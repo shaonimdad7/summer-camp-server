@@ -26,10 +26,57 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const usersCollection = client.db("educlamdb").collection("users")
         const classCollection = client.db("educlamdb").collection("class")
         const instructorCollection = client.db("educlamdb").collection("instractor")
         const reviewCollection = client.db("educlamdb").collection("review")
         const cartsCollection = client.db("educlamdb").collection("carts")
+
+
+        // users side 
+        app.get('/users', async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result);
+        })
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email }
+            const existingUser = await usersCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: 'user already exists' })
+            }
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        })
+
+        app.patch('/users/instructo/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    role: 'instructor',
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+
+        })
+        app.patch('/users/admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+
+        })
+
+
+
+
 
         // all classes side
         app.get('/class', async (req, res) => {
