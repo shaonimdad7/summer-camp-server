@@ -50,22 +50,6 @@ async function run() {
         })
 
 
-
-        // app.get('/users/instructo/:email', async (req, res) => {
-        //     const email = req.params.email;
-        //     const query = { email: email };
-        //     const user = await usersCollection.findOne(query);
-        //     const result = { instructor: user?.role === 'instructor' };
-        //     res.send(result);
-        // });
-
-        // app.get('/users/admin/:email', async (req, res) => {
-        //     const email = req.params.email;
-        //     const query = { email: email };
-        //     const user = await usersCollection.findOne(query);
-        //     const result = { admin: user?.role === 'admin' };
-        //     res.send(result);
-        // });
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -109,56 +93,23 @@ async function run() {
             res.send(result);
         });
 
-
-        // app.get('/users/instructo/:email', async (req, res) => {
-        //     const email = req.params.email;
-        //     const query = { email: email }
-        //     const user = await usersCollection.findOne(query);
-        //     const result = { admin: user?.role === 'instructor' }
-        //     res.send(result);
-        // })
-        // app.get('/users/admin/:email', async (req, res) => {
-        //     const email = req.params.email;
-        //     const query = { email: email }
-        //     const user = await usersCollection.findOne(query);
-        //     const result = { admin: user?.role === 'admin' }
-        //     res.send(result);
-        // })
-
-        // app.patch('/users/instructo/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: new ObjectId(id) };
-        //     const updatedDoc = {
-        //         $set: {
-        //             role: 'instructor',
-        //         }
-        //     };
-        //     const result = await usersCollection.updateOne(filter, updatedDoc);
-        //     res.send(result);
-
-        // })
-        // app.patch('/users/admin/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: new ObjectId(id) };
-        //     const updatedDoc = {
-        //         $set: {
-        //             role: 'admin'
-        //         }
-        //     };
-        //     const result = await usersCollection.updateOne(filter, updatedDoc);
-        //     res.send(result);
-
-        // })
-
-
-
-
-
         // all classes side
         app.get('/class', async (req, res) => {
             const result = await classCollection.find().toArray();
             res.send(result);
         })
+        app.post('/class', async (req, res) => {
+            const newClass = req.body;
+            const result = await classCollection.insertOne(newClass)
+            res.send(result);
+        })
+
+        app.get('/class/email/:email', async (req, res) => {
+            const email = req.params.email;
+            const result = await classCollection.find({ email }).sort({ price: -1, category: 1 }).toArray();
+            res.send(result);
+        });
+
 
 
         // all instructors side
