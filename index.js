@@ -110,6 +110,38 @@ async function run() {
             res.send(result);
         });
 
+        // app.get('/class/approved/:id', async (req, res) => {
+        //     const email = req.params.id;
+        //     const result = await classCollection.find({ id }).sort({ price: -1, category: 1 }).toArray();
+        //     res.send(result);
+        // });
+
+
+
+        app.patch('/class/approved/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'approved',
+                },
+            };
+            const result = await classCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        });
+
+        app.patch('/class/denied/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'denied',
+                },
+            };
+            const result = await classCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        });
+
 
 
         // all instructors side
