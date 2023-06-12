@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 const port = process.env.PORT || 5000;
 
 // middleWare
@@ -31,6 +32,7 @@ async function run() {
         const instructorCollection = client.db("educlamdb").collection("instractor")
         const reviewCollection = client.db("educlamdb").collection("review")
         const cartsCollection = client.db("educlamdb").collection("carts")
+        const enroedllCollection = client.db("educlamdb").collection("enrolled")
 
 
         // users side api
@@ -176,6 +178,7 @@ async function run() {
             res.send(result);
         });
 
+
         app.post('/carts', async (req, res) => {
             const item = req.body;
             console.log(item);
@@ -189,6 +192,29 @@ async function run() {
             const result = await cartsCollection.deleteOne(query);
             res.send(result);
         })
+        // all enrolled side 
+        app.post('/enrolled', async (req, res) => {
+            const item = req.body;
+            console.log(item);
+            const result = await enroedllCollection.insertOne(item);
+            res.send(result);
+
+        })
+        app.get('/enrolled/email/:email', async (req, res) => {
+            const email = req.params.email;
+            const result = await enroedllCollection.find({ email }).sort({ price: -1, category: 1 }).toArray();
+            res.send(result);
+        });
+        app.delete('/enrolled/email/:email', async (req, res) => {
+            try {
+                const email = req.params.email;
+                const result = await enroedllCollection.deleteOne({ email });
+                res.send(result);
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
 
 
         // all reviews side
@@ -196,6 +222,23 @@ async function run() {
             const result = await reviewCollection.find().toArray();
             res.send(result);
         })
+
+        // stripe payment api
+        app.post('create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            })
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
